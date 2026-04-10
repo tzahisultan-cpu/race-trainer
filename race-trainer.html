@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Race Trainer AI</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c10;--card:#0d1117;--border:#1c2433;--accent:#00e5a0;--dim:rgba(0,229,160,0.08);--red:#ff4757;--yellow:#ffd32a;--text:#e8eaf0;--muted:#6b7a99}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;min-height:100vh}
+.mono{font-family:'IBM Plex Mono',monospace}
+.page{max-width:560px;margin:0 auto;padding:16px 14px 60px}
+.col{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+.card-g{border-color:rgba(0,229,160,0.3);background:linear-gradient(135deg,#0d1f2d,#080c10)}
+.btn{font-family:'Heebo',sans-serif;font-weight:700;border-radius:8px;border:none;cursor:pointer;transition:opacity .15s,transform .1s;font-size:14px;padding:11px 20px}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.bp{background:var(--accent);color:#080c10}
+.bg{background:transparent;color:var(--accent);border:1px solid rgba(0,229,160,0.3)}
+.bm{background:var(--border);color:var(--muted)}
+.bd{background:var(--red);color:#fff}
+.bsk{background:#1c1200;color:var(--yellow);border:1px solid rgba(255,211,42,0.25)}
+.bsm{padding:7px 13px;font-size:12px}
+.bf{width:100%}
+.brow{display:flex;gap:8px}
+.inp{background:#0a1020;border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--text);font-size:14px;outline:none;width:100%;font-family:'Heebo',sans-serif;transition:border-color .15s}
+.inp:focus{border-color:rgba(0,229,160,0.4)}
+.inpa{border-color:rgba(0,229,160,0.35);color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;text-align:center;padding:11px 6px}
+.lbl{font-size:11px;color:var(--muted);display:block;margin-bottom:4px}
+.la{color:var(--accent);font-weight:700;font-size:13px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.hdr{background:linear-gradient(135deg,#080c10,#0d1f2d);border-bottom:1px solid var(--border);padding:18px 20px;text-align:center}
+.hdr h1{font-size:24px;font-weight:900;color:var(--accent);letter-spacing:-.5px}
+.hdr p{color:var(--muted);font-size:13px;margin-top:4px}
+.rhdr{background:linear-gradient(180deg,#0d1f2d,#080c10);padding:13px 16px;border-bottom:1px solid var(--border)}
+.rhi{display:flex;justify-content:space-between;align-items:flex-start;max-width:560px;margin:0 auto}
+.pbw{max-width:560px;margin:9px auto 0;height:3px;background:var(--border);border-radius:2px}
+.pb{height:100%;background:var(--accent);border-radius:2px;transition:width .5s}
+.tabs{display:flex;border-bottom:1px solid var(--border);max-width:560px;margin:0 auto}
+.tab{flex:1;padding:10px 0;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Heebo',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .15s}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.rbtn{background:#080c10;border:2px solid var(--border);border-radius:12px;padding:13px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;transition:border-color .15s;font-family:'Heebo',sans-serif}
+.rbtn:hover{border-color:var(--accent)}
+.rbi{display:flex;align-items:center;gap:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.wk{border-radius:10px;padding:11px;border:1px solid var(--border)}
+.wk.ok{background:var(--dim);border-color:rgba(0,229,160,0.3)}
+.wk.sk{background:#0f0800;border-color:rgba(255,211,42,0.3)}
+.wk.nd{background:#060a0e}
+.wkh{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.sc{text-align:center;padding:12px}
+.sv{font-size:18px;font-weight:900;color:var(--accent);margin:3px 0;font-family:'IBM Plex Mono',monospace}
+.sl{font-size:11px;color:var(--muted)}
+@keyframes sp{to{transform:rotate(360deg)}}
+.spin{width:44px;height:44px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:sp .8s linear infinite}
+.spsm{width:16px;height:16px;border-width:2px;flex-shrink:0}
+.ls{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.bnr{padding:10px 16px;text-align:center;font-size:13px}
+.bnra{background:var(--dim);border-bottom:1px solid rgba(0,229,160,0.2);color:var(--accent)}
+.gal{padding:12px 16px;max-width:560px;margin:0 auto}
+.gf{background:#1a0800;border-bottom:1px solid rgba(255,71,87,0.3)}
+.gs{background:#081a0c;border-bottom:1px solid rgba(0,229,160,0.3)}
+.ali{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--card);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:520px;border:1px solid var(--border);max-height:90vh;overflow-y:auto}
+.mhdr{display:flex;justify-content:space-between;margin-bottom:14px}
+.xbtn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;line-height:1}
+.fgrid{display:flex;flex-wrap:wrap;gap:5px}
+.fb{padding:5px 9px;border-radius:16px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-family:'Heebo',sans-serif;transition:all .15s}
+.fb.on{border-color:var(--accent);background:var(--dim);color:var(--accent)}
+.csvrow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px}
+.upl{display:block;border:2px dashed rgba(0,229,160,0.25);border-radius:12px;padding:24px 14px;text-align:center;cursor:pointer;background:var(--dim);margin-bottom:12px;transition:border-color .15s}
+.upl:hover{border-color:rgba(0,229,160,0.5)}
+.skbox{background:#0c0a00;border:1px solid rgba(255,211,42,0.2);border-radius:10px;padding:12px;margin-bottom:14px}
+.apis{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.apic{max-width:420px;width:100%}
+.apin{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;white-space:pre-line}
+.nc{background:linear-gradient(135deg,#0d1f2d,#080c10);border:1px solid rgba(0,229,160,0.25)}
+.mb{background:#080c10;border-radius:8px;padding:9px;text-align:center}
+.mv{font-weight:800;color:var(--accent);font-size:14px;margin-top:2px;font-family:'IBM Plex Mono',monospace}
+.ml{font-size:10px;color:var(--muted)}
+.wkhdr{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:2px 0}
+.wkbody{margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.rec{background:linear-gradient(135deg,#0a1f10,#0a1020);border:1px solid rgba(0,229,160,0.3);border-radius:12px;padding:12px;margin-bottom:12px}
+.rt{font-size:28px;font-weight:900;color:var(--accent);font-family:'IBM Plex Mono',monospace}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const SK='race-v5',AK='race-ak';
+const RACES=[{key:'5k',label:'5 ק"מ',km:5,wks:'6-8',icon:'⚡'},{key:'10k',label:'10 ק"מ',km:10,wks:'8-10',icon:'🔥'},{key:'15k',label:'15 ק"מ',km:15,wks:'10-12',icon:'💪'},{key:'half',label:'חצי מרתון',km:21.1,wks:'12-16',icon:'🏃'},{key:'full',label:'מרתון',km:42.2,wks:'16-20',icon:'🏆'}];
+const TY={easy:{label:'סבולת קלה',color:'#00e5a0',e:'🟢'},long:{label:'ריצה ארוכה',color:'#00b4ff',e:'🔵'},tempo:{label:'טמפו',color:'#ffd32a',e:'🟡'},interval:{label:'אינטרוולים',color:'#ff6b35',e:'🟠'},rest:{label:'מנוחה',color:'#6b7a99',e:'⚪'},cross:{label:'אימון צולב',color:'#b44fff',e:'🟣'}};
+const FL=['😫 קשה מאוד','😓 קשה','😐 בסדר','😊 טוב','🔥 מצוין'];
+let app=null,key='',tab='next',openWk=0,logWkt=null,busy=false,gAlert=null,sStep=0;
+let sd={race:null,csv:null,rec:null,goalH:'',goalM:'',goalS:'',date:'',longKm:'',wkKm:'',runs:[{d:'',km:'',p:''},{d:'',km:'',p:''},{d:'',km:'',p:''}],analyzing:false};
+
+function save(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
+function load(){try{const v=localStorage.getItem(SK);return v?JSON.parse(v):null;}catch(e){return null;}}
+function saveKey(k){try{localStorage.setItem(AK,k);}catch(e){}}
+function loadKey(){try{return localStorage.getItem(AK)||'';}catch(e){return '';}}
+
+async function ai(sys,usr){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,system:sys,messages:[{role:'user',content:usr}]})});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?d.error.message:'API error');
+  const b=d.content.find(x=>x.type==='text');
+  return b?b.text:'';
+}
+
+function xj(t){
+  const s=t.replace(/```json/g,'').replace(/```/g,'').trim();
+  const a=s.indexOf('{'),b=s.lastIndexOf('}');
+  if(a<0||b<0)throw new Error('No JSON');
+  return JSON.parse(s.slice(a,b+1));
+}
+
+function parseCSV(raw){
+  const txt=raw.replace(/^\uFEFF/,'').replace(/\r/g,'');
+  const lines=txt.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(lines.length<2)throw new Error('קובץ ריק');
+  function sr(line){const cols=[];let cur='',q=false;for(const c of line){if(c==='"'){q=!q;}else if(c===','&&!q){cols.push(cur.replace(/^"|"$/g,'').trim());cur='';}else cur+=c;}cols.push(cur.replace(/^"|"$/g,'').trim());return cols;}
+  const hds=sr(lines[0]).map(h=>h.toLowerCase().trim());
+  function col(...ts){for(const t of ts){const i=hds.findIndex(h=>h.includes(t));if(i>=0)return i;}return -1;}
+  const iD=col('date','תאריך'),iT=col('activity type','type','sport'),iDi=col('distance','מרחק','dist'),iP=col('avg pace','pace','קצב'),iH=col('avg hr','heart rate','דופק');
+  if(iD<0)throw new Error('לא נמצאה עמודת תאריך. עמודות: '+hds.slice(0,6).join(', '));
+  if(iDi<0)throw new Error('לא נמצאה עמודת מרחק. עמודות: '+hds.slice(0,6).join(', '));
+  const cut=new Date();cut.setDate(cut.getDate()-112);
+  const runs=[];
+  for(let i=1;i<lines.length;i++){
+    const row=sr(lines[i]);if(row.length<2)continue;
+    const rt=iT>=0?row[iT].toLowerCase():'';
+    if(rt&&!['run','ריצה','trail','treadmill'].some(t=>rt.includes(t)))continue;
+    let ds=row[iD].split(' ')[0];
+    if(/^\d{2}\/\d{2}\/\d{4}$/.test(ds)){const[d,m,y]=ds.split('/');ds=y+'-'+m+'-'+d;}
+    const dt=new Date(ds);if(isNaN(dt)||dt<cut)continue;
+    let km=parseFloat(row[iDi].replace(/[^0-9.,]/g,'').replace(',','.'));
+    if(!km||km<1)continue;
+    if(row[iDi].toLowerCase().includes('mi')&&!row[iDi].toLowerCase().includes('min'))km*=1.60934;
+    runs.push({date:ds,km:km.toFixed(2),pace:iP>=0?row[iP]:'',hr:iH>=0?row[iH].replace(/[^0-9]/g,''):''});
+  }
+  if(!runs.length)throw new Error('לא נמצאו ריצות ב-16 השבועות האחרונים');
+  runs.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const lk=Math.max(...runs.map(r=>parseFloat(r.km))).toFixed(1);
+  const a8=new Date();a8.setDate(a8.getDate()-56);
+  const rc=runs.filter(r=>new Date(r.date)>=a8);
+  const wk=(rc.reduce((s,r)=>s+parseFloat(r.km),0)/8).toFixed(1);
+  return{runs,longestKm:lk,weeklyKm:wk};
+}
+
+// DOM helpers
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!==undefined)e.innerHTML=html;return e;}
+function div(cls,html){return el('div',cls,html);}
+function mk(type){const m=TY[type]||TY.easy;const t=el('span','tag',m.e+' '+m.label);t.style.background=m.color+'22';t.style.color=m.color;return t;}
+function spin(sm){return el('div','spin'+(sm?' spsm':''));}
+function btn(cls,txt,fn,dis){const b=el('button','btn '+cls,txt);if(fn)b.onclick=fn;if(dis)b.disabled=true;return b;}
+
+function render(){
+  const root=document.getElementById('root');
+  root.innerHTML='';
+  if(!key){root.appendChild(apiScreen());return;}
+  if(!app){root.appendChild(setupScreen());return;}
+  root.appendChild(trainScreen());
+}
+
+function apiScreen(){
+  const w=div('apis');
+  const c=div('card apic col');
+  c.innerHTML='<div style="font-size:40px;text-align:center;margin-bottom:12px">🏃</div><h1 style="color:#00e5a0;font-size:22px;text-align:center;margin-bottom:4px">Race Trainer AI</h1><p style="color:#6b7a99;font-size:13px;text-align:center;margin-bottom:20px">תוכנית אימונים אישית ודינמית</p>';
+  c.appendChild(el('label','la lbl','מפתח API של Anthropic'));
+  const inp=el('input','inp');inp.type='password';inp.placeholder='sk-ant-...';
+  c.appendChild(inp);
+  const note=el('p','apin','🔑 המפתח נשמר רק על המכשיר שלך.\nקבל מפתח על: console.anthropic.com\nכל משתמש צריך מפתח משלו (יש חבילה חינמית).');
+  c.appendChild(note);
+  const b=btn('bp bf','כנס לאפליקציה ←',()=>{
+    const k=inp.value.trim();
+    if(!k.startsWith('sk-')){alert('מפתח לא תקין — חייב להתחיל ב-sk-');return;}
+    key=k;saveKey(k);render();
+  });
+  b.style.marginTop='16px';
+  c.appendChild(b);
+  w.appendChild(c);return w;
+}
+
+function setupScreen(){
+  const w=el('div');
+  w.appendChild(appHdr());
+  const page=div('page col');
+  if(sStep===0){page.appendChild(racePicker());}
+  else{page.appendChild(step1());}
+  w.appendChild(page);return w;
+}
+
+function appHdr(){
+  const h=div('hdr');
+  h.innerHTML='<div style="font-size:36px;margin-bottom:4px">🏃</div><h1>Race Trainer AI</h1><p>תוכנית אימונים אישית ודינמית</p>';
+  return h;
+}
+
+function racePicker(){
+  const c=div('card col');
+  c.appendChild(el('h2','','<span style="color:#00e5a0;font-size:18px">🎯 בחר מרחק יעד</span>'));
+  RACES.forEach(r=>{
+    const b=el('button','rbtn');
+    const inner=div('rbi');
+    inner.innerHTML='<span style="font-size:26px">'+r.icon+'</span>';
+    const txt=el('div');
+    txt.innerHTML='<div style="color:#e8eaf0;font-weight:800;font-size:15px">'+r.label+'</div><div style="color:#6b7a99;font-size:11px;margin-top:2px">'+r.km+' ק"מ | '+r.wks+' שבועות</div>';
+    inner.appendChild(txt);b.appendChild(inner);
+    b.innerHTML+=`<span style="color:#6b7a99;font-size:18px">›</span>`;
+    b.onclick=()=>{sd.race=r;sStep=1;render();};
+    c.appendChild(b);
+  });
+  return c;
+}
+
+function step1(){
+  const col=div('col');
+  if(!sd.csv){col.appendChild(csvUpload());}
+  else{col.appendChild(csvSummary());}
+  col.appendChild(goalCard());
+  const dc=div('card');
+  dc.innerHTML='<h3 style="color:#00e5a0;font-size:15px;margin-bottom:10px">🏁 תאריך התחרות</h3>';
+  const di=el('input','inp');di.type='date';di.value=sd.date;di.oninput=e=>sd.date=e.target.value;
+  dc.appendChild(di);col.appendChild(dc);
+  const err=div('','');err.id='gerr';err.style.cssText='color:#ff4757;font-size:13px;min-height:16px';col.appendChild(err);
+  const br=div('brow');
+  br.appendChild(btn('bm bsm','חזור',()=>{sStep=0;render();}));
+  const gb=btn('bp','🤖 צור תוכנית עם Claude',genPlan);
+  gb.style.flex='1';
+  if(!sd.date||(!sd.csv&&!sd.longKm))gb.disabled=true;
+  br.appendChild(gb);col.appendChild(br);
+  return col;
+}
+
+function csvUpload(){
+  const c=div('card col');
+  const r=sd.race;
+  c.innerHTML='<h2 style="color:#00e5a0;font-size:17px">'+(r?r.icon:'')+' '+(r?r.label:'')+' — נתוני ריצה</h2><p style="color:#6b7a99;font-size:13px">Garmin Connect: Activities → Export CSV</p>';
+  const lbl=el('label','upl');
+  lbl.innerHTML='<div style="font-size:30px;margin-bottom:6px">📂</div><div style="color:#00e5a0;font-weight:700;font-size:14px">העלה CSV מ-Garmin</div><div style="color:#6b7a99;font-size:11px;margin-top:3px">לחץ לבחירת קובץ</div>';
+  const fi=el('input');fi.type='file';fi.accept='.csv';fi.style.display='none';
+  fi.onchange=handleFile;lbl.appendChild(fi);c.appendChild(lbl);
+  c.appendChild(el('div','','<div style="text-align:center;color:#6b7a99;font-size:12px;margin-bottom:10px">— או הזן ידנית —</div>'));
+  const g=div('g2');
+  const ll=el('div');ll.innerHTML='<label class="lbl">ריצה ארוכה (ק"מ)</label>';
+  const il=el('input','inp');il.type='number';il.placeholder='12';il.value=sd.longKm;il.oninput=e=>sd.longKm=e.target.value;
+  ll.appendChild(il);g.appendChild(ll);
+  const lw=el('div');lw.innerHTML='<label class="lbl">ממוצע שבועי (ק"מ)</label>';
+  const iw=el('input','inp');iw.type='number';iw.placeholder='30';iw.value=sd.wkKm;iw.oninput=e=>sd.wkKm=e.target.value;
+  lw.appendChild(iw);g.appendChild(lw);c.appendChild(g);
+  sd.runs.forEach((run,i)=>{
+    const row=el('div');row.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px';
+    const id=el('input','inp');id.type='date';id.value=run.d;id.oninput=e=>{sd.runs[i].d=e.target.value;};
+    const ik=el('input','inp');ik.type='number';ik.placeholder='ק"מ';ik.value=run.km;ik.oninput=e=>{sd.runs[i].km=e.target.value;};
+    const ip=el('input','inp');ip.placeholder='5:45';ip.value=run.p;ip.oninput=e=>{sd.runs[i].p=e.target.value;};
+    row.appendChild(id);row.appendChild(ik);row.appendChild(ip);c.appendChild(row);
+  });
+  const se=div('');se.id='serr';se.style.cssText='color:#ff4757;font-size:12px;margin-top:6px;min-height:16px';c.appendChild(se);
+  return c;
+}
+
+function csvSummary(){
+  const c=div('card card-g');
+  const top=div('brow');
+  top.innerHTML='<div style="color:#00e5a0;font-weight:800;font-size:14px">✅ '+sd.csv.runs.length+' ריצות זוהו</div>';
+  const rb=btn('bg bsm','החלף',()=>{sd.csv=null;sd.rec=null;render();});top.appendChild(rb);c.appendChild(top);
+  const g=div('g3');g.style.margin='10px 0';
+  [['ריצה ארוכה',sd.csv.longestKm+' ק"מ'],['ממוצע שבועי',sd.csv.weeklyKm+' ק"מ'],['סה"כ',sd.csv.runs.length+' ריצות']].forEach(([l,v])=>{
+    const b=div('mb');b.innerHTML='<div class="ml">'+l+'</div><div class="mv">'+v+'</div>';g.appendChild(b);
+  });c.appendChild(g);
+  const lst=el('div');lst.style.maxHeight='120px';lst.style.overflowY='auto';
+  sd.csv.runs.slice(0,6).forEach(r=>{
+    const row=div('csvrow');
+    row.innerHTML='<span style="color:#6b7a99">'+r.date+'</span><span style="color:#e8eaf0;font-weight:700">'+r.km+' ק"מ</span><span style="color:#6b7a99">'+(r.pace||'—')+'</span>';
+    lst.appendChild(row);
+  });
+  if(sd.csv.runs.length>6)lst.appendChild(el('div','','<div style="font-size:10px;color:#6b7a99;text-align:center;padding-top:4px">+ '+(sd.csv.runs.length-6)+' ריצות נוספות</div>'));
+  c.appendChild(lst);return c;
+}
+
+function goalCard(){
+  const c=div('card col');
+  c.innerHTML='<h3 style="color:#00e5a0;font-size:15px">⏱ זמן מטרה</h3>';
+  if(sd.analyzing){
+    const row=el('div');row.style.cssText='display:flex;align-items:center;gap:10px;background:#0a1020;border:1px solid rgba(0,229,160,0.2);border-radius:10px;padding:10px;margin-bottom:10px';
+    row.appendChild(spin(true));row.innerHTML+='<span style="font-size:12px;color:#6b7a99">Claude מחשב המלצת זמן...</span>';
+    c.appendChild(row);
+  }
+  if(sd.rec&&!sd.analyzing){
+    const rec=div('rec');
+    const top=div('brow');
+    const left=el('div');
+    left.innerHTML='<div style="font-size:10px;color:#00e5a0;font-weight:700;margin-bottom:4px">🤖 המלצת Claude</div><div class="rt">'+sd.rec.time+'</div><div style="font-size:11px;color:#6b7a99">'+(sd.rec.pace||'')+' | ביטחון: '+(sd.rec.confidence==='high'?'גבוה':sd.rec.confidence==='medium'?'בינוני':'נמוך')+'</div>';
+    top.appendChild(left);
+    const ab=btn('bg bsm','קבל ↑',()=>{
+      const p=(sd.rec.time||'').split(':');
+      sd.goalH=p[0]||'';sd.goalM=p[1]||'';sd.goalS=p[2]||'';render();
+    });top.appendChild(ab);rec.appendChild(top);
+    if(sd.rec.reasoning)rec.appendChild(el('div','','<div style="font-size:11px;color:#6b7a99;margin-top:8px;border-top:1px solid #1c2433;padding-top:8px">'+sd.rec.reasoning+'</div>'));
+    c.appendChild(rec);
+  }
+  const g=div('g3');
+  [['שעות',sd.goalH,'goalH','0'],['דקות',sd.goalM,'goalM','00'],['שניות',sd.goalS,'goalS','00']].forEach(([l,v,k,ph])=>{
+    const w=el('div');w.innerHTML='<label class="lbl">'+l+'</label>';
+    const inp=el('input','inp inpa');inp.type='number';inp.placeholder=ph;inp.value=v;inp.oninput=e=>sd[k]=e.target.value;
+    w.appendChild(inp);g.appendChild(w);
+  });
+  c.appendChild(g);
+  c.appendChild(el('div','','<div style="font-size:11px;color:#6b7a99;margin-top:7px">השאר ריק לקבלת זמן מומלץ אוטומטי</div>'));
+  return c;
+}
+
+function handleFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=parseCSV(ev.target.result);
+      sd.csv=data;sd.longKm=data.longestKm;sd.wkKm=data.weeklyKm;sd.analyzing=true;render();
+      doAnalyze(data);
+    }catch(ex){const ee=document.getElementById('serr');if(ee)ee.textContent='שגיאה: '+ex.message;}
+  };
+  reader.readAsText(file);
+}
+
+async function doAnalyze(data){
+  const r=sd.race;
+  try{
+    const runs=data.runs.slice(0,15).map(x=>({d:x.date,km:x.km,p:x.pace}));
+    const txt=await ai('You are a running coach. Analyze runs and predict finish time. Return ONLY compact JSON.','Runs:'+JSON.stringify(runs)+'\nLongest:'+data.longestKm+'km|Weekly:'+data.weeklyKm+'km|Race:'+(r?r.label:'')+' ('+(r?r.km:'')+'km)\nReturn:{"time":"1:55:30","pace":"5:28/km","confidence":"high","reasoning":"עברית 60 תווים"}');
+    const res=xj(txt);sd.rec=res;
+    if(res.time){const p=res.time.split(':');sd.goalH=p[0]||'';sd.goalM=p[1]||'';sd.goalS=p[2]||'';}
+  }catch(ex){}
+  sd.analyzing=false;render();
+}
+
+async function genPlan(){
+  const r=sd.race;
+  const gt=(sd.goalH||sd.goalM||sd.goalS)?((sd.goalH||'0')+':'+(sd.goalM||'00').padStart(2,'0')+':'+(sd.goalS||'00').padStart(2,'0')):'';
+  const runs=sd.csv?sd.csv.runs.slice(0,25):sd.runs.filter(x=>x.km);
+  const compact=runs.map(x=>({d:x.date||x.d,km:x.km,p:x.pace||x.p}));
+  const root=document.getElementById('root');root.innerHTML='';
+  const ls=div('ls');ls.appendChild(spin(false));
+  ls.innerHTML+='<div style="color:#00e5a0;font-weight:800;font-size:18px;font-family:Heebo,sans-serif;text-align:center">Claude בונה את התוכנית...</div><div style="color:#6b7a99;font-size:13px;font-family:Heebo,sans-serif">מנתח '+compact.length+' ריצות ובונה אסטרטגיה</div>';
+  root.appendChild(ls);
+  try{
+    const sys='You are an elite running coach. Return ONLY minified JSON. Hebrew max 35 chars. 4-5 workouts/week, include rest days type:rest, id format w1d1.';
+    const usr='Race:'+(r?r.label:'')+' '+(r?r.km:21.1)+'km|Goal:'+(gt||'estimate')+'|Date:'+sd.date+'\nLongest:'+sd.longKm+'km|Weekly:'+sd.wkKm+'km\nRuns('+compact.length+'):'+JSON.stringify(compact)+'\nBuild '+(r?r.wks:'')+' week plan.\nReturn:{"fitnessLevel":"intermediate","estimatedFinish":"1:55:00","targetPace":"5:27/km","raceDistance":"'+(r?r.key:'half')+'","weeklyPlan":[{"week":1,"phase":"Base","totalKm":25,"workouts":[{"id":"w1d1","day":"ראשון","type":"easy","distance":7,"targetPace":"6:20-6:40","heartRateZone":"Z2","description":"ריצה קלה","tips":"דופק שיחה","completed":false,"actual":null}]}],"notes":"הערה"}';
+    const txt=await ai(sys,usr);
+    const plan=xj(txt);
+    app={profile:{raceDistance:r?r.key:'half',targetDate:sd.date,goalTime:gt,longestKm:sd.longKm,weeklyKm:sd.wkKm},plan,createdAt:new Date().toISOString()};
+    save(app);render();
+  }catch(ex){
+    render();
+    setTimeout(()=>{const ee=document.getElementById('gerr');if(ee)ee.textContent='שגיאה: '+ex.message;},100);
+  }
+}
+
+function trainScreen(){
+  const plan=app.plan,prof=app.profile;
+  const ri=RACES.find(r=>r.key===(plan.raceDistance||prof.raceDistance))||RACES[3];
+  const wks=plan.weeklyPlan||[];
+  const all=wks.flatMap(w=>w.workouts);
+  const done=all.filter(w=>w.completed||w.skipped).length;
+  const total=all.filter(w=>w.type!=='rest').length;
+  const pct=total>0?Math.round(done/total*100):0;
+  const dl=prof.targetDate?Math.max(0,Math.ceil((new Date(prof.targetDate)-new Date())/86400000)):null;
+  const nxt=all.find(w=>!w.completed&&!w.skipped&&w.type!=='rest');
+
+  const w=el('div');
+
+  // Header
+  const rh=div('rhdr');
+  const rhi=div('rhi');
+  const rl=el('div');
+  rl.innerHTML='<div style="font-weight:900;font-size:17px;color:#00e5a0;font-family:Heebo,sans-serif">'+ri.icon+' '+ri.label+'</div><div style="font-size:11px;color:#6b7a99;margin-top:2px;font-family:IBM Plex Mono,monospace">'+(dl!==null?dl+' ימים | ':'')+(prof.goalTime?'מטרה: '+prof.goalTime:'יעד: '+plan.estimatedFinish)+' | '+plan.targetPace+'</div>';
+  const rr=el('div');rr.style.textAlign='left';
+  rr.innerHTML='<div style="font-size:20px;font-weight:900;color:#00e5a0;font-family:IBM Plex Mono,monospace">'+pct+'%</div><div style="font-size:10px;color:#6b7a99">הושלם</div>';
+  rhi.appendChild(rl);rhi.appendChild(rr);rh.appendChild(rhi);
+  const pbw=div('pbw');const pb=div('pb');pb.style.width=pct+'%';pbw.appendChild(pb);rh.appendChild(pbw);
+  w.appendChild(rh);
+
+  const sm=div('bnr bnra');sm.id='sm';sm.style.display='none';w.appendChild(sm);
+
+  if(gAlert){
+    const ga=div('gal '+(gAlert.type==='too_fast'?'gf':'gs'));
+    const ai2=div('ali');
+    const al=el('div');
+    al.innerHTML='<div style="font-weight:800;font-size:13px;color:'+(gAlert.type==='too_fast'?'#ff4757':'#00e5a0')+';margin-bottom:3px">'+(gAlert.type==='too_fast'?'⚠️ זמן המטרה שאפתני מדי':'🚀 אתה מתקדם מהר מהצפוי!')+'</div><div style="font-size:12px;color:#e8eaf0">'+(gAlert.reason||'')+'</div>'+(gAlert.suggestedTime?'<div style="font-size:11px;color:#6b7a99;margin-top:4px">זמן מומלץ: <strong style="color:#00e5a0">'+gAlert.suggestedTime+'</strong></div>':'');
+    const ar=div('col');ar.style.gap='5px';
+    if(gAlert.suggestedTime)ar.appendChild(btn('bp bsm',gAlert.suggestedTime,()=>{app={...app,profile:{...prof,goalTime:gAlert.suggestedTime}};save(app);gAlert=null;render();}));
+    ar.appendChild(btn('bm bsm','שמור',()=>{gAlert=null;render();}));
+    ai2.appendChild(al);ai2.appendChild(ar);ga.appendChild(ai2);w.appendChild(ga);
+  }
+
+  const tabs=div('tabs');
+  [['next','⚡ הבא'],['plan','📋 תוכנית'],['stats','📊 סטטיסטיקה']].forEach(([id,lbl])=>{
+    const t=el('button','tab'+(tab===id?' on':''),lbl);t.onclick=()=>{tab=id;render();};tabs.appendChild(t);
+  });
+  w.appendChild(tabs);
+
+  const page=div('page');
+
+  if(tab==='next'){
+    if(nxt){
+      const c=div('card nc col');
+      c.innerHTML='<div style="font-size:11px;color:#00e5a0;font-weight:700">⚡ האימון הבא שלך</div><div style="font-size:20px;font-weight:900;font-family:Heebo,sans-serif">'+nxt.day+'</div>';
+      c.appendChild(mk(nxt.type));
+      const mg=div('g3');mg.style.margin='12px 0';
+      [['מרחק',nxt.distance+' ק"מ'],['קצב',nxt.targetPace||''],['דופק',nxt.heartRateZone||'']].forEach(([l,v])=>{
+        const b=div('mb');b.innerHTML='<div class="ml">'+l+'</div><div class="mv">'+v+'</div>';mg.appendChild(b);
+      });c.appendChild(mg);
+      c.appendChild(el('div','','<div style="font-size:13px;color:#e8eaf0;margin-bottom:4px">'+(nxt.description||'')+'</div>'));
+      if(nxt.tips)c.appendChild(el('div','','<div style="font-size:12px;color:#00e5a0">💡 '+nxt.tips+'</div>'));
+      const br=div('brow');br.style.marginTop='16px';
+      const rb=btn('bp','✓ תעד אימון',()=>{logWkt=nxt;render();},busy);rb.style.flex='1';br.appendChild(rb);
+      br.appendChild(btn('bsk','😴 דילגתי',()=>{logWkt=nxt;render();},busy));
+      c.appendChild(br);page.appendChild(c);
+    }else{
+      const c=div('card');c.style.cssText='text-align:center;padding:48px 20px';
+      c.innerHTML='<div style="font-size:52px">🏆</div><div style="font-size:20px;font-weight:900;color:#00e5a0;margin-top:12px;font-family:Heebo,sans-serif">כל האימונים הושלמו!</div><div style="font-size:14px;color:#6b7a99;margin-top:6px">אתה מוכן לתחרות!</div>';
+      page.appendChild(c);
+    }
+  }
+
+  if(tab==='plan'){
+    wks.forEach((wk,wi)=>{
+      const wd=wk.workouts.filter(w=>w.completed||w.skipped).length;
+      const wt=wk.workouts.filter(w=>w.type!=='rest').length;
+      const open=openWk===wi;
+      const c=div('card');c.style.marginBottom='8px';
+      const h=div('wkhdr');
+      h.innerHTML='<div><div style="font-weight:800;font-size:14px;font-family:Heebo,sans-serif">שבוע '+wk.week+' — '+wk.phase+'</div><div style="font-size:11px;color:#6b7a99;margin-top:2px">'+wk.totalKm+' ק"מ | '+wd+'/'+wt+'</div></div><span style="color:#6b7a99">'+(open?'▲':'▼')+'</span>';
+      h.onclick=()=>{openWk=open?-1:wi;render();};c.appendChild(h);
+      if(open){
+        const body=div('wkbody');
+        wk.workouts.forEach(wkt=>{
+          const cls='wk '+(wkt.skipped?'sk':wkt.completed?'ok':'nd');
+          const wc=el('div',cls);
+          const wh=div('wkh');
+          const wl=el('div');wl.style.cssText='display:flex;align-items:center;gap:7px';
+          wl.innerHTML='<span style="font-weight:700;font-size:13px;font-family:Heebo,sans-serif">'+wkt.day+'</span>';
+          wl.appendChild(mk(wkt.type));wh.appendChild(wl);
+          if(wkt.completed)wh.innerHTML+='<span style="color:#00e5a0">✓</span>';
+          else if(wkt.skipped)wh.innerHTML+='<span style="font-size:11px;color:#ffd32a">'+(wkt.skipReason||'דולג')+'</span>';
+          else if(wkt.type!=='rest')wh.appendChild(btn('bp bsm','תעד',()=>{logWkt=wkt;render();},busy));
+          wc.appendChild(wh);
+          if(wkt.type!=='rest')wc.appendChild(el('div','','<div style="font-size:12px;color:#6b7a99">'+wkt.distance+' ק"מ | '+wkt.targetPace+' | '+wkt.heartRateZone+'</div>'));
+          wc.appendChild(el('div','','<div style="font-size:12px;color:#e8eaf0;margin-top:3px">'+(wkt.description||'')+'</div>'));
+          if(wkt.tips)wc.appendChild(el('div','','<div style="font-size:11px;color:#00e5a0;margin-top:3px">💡 '+wkt.tips+'</div>'));
+          if(wkt.completed&&wkt.actual){wc.appendChild(el('div','','<div style="margin-top:7px;padding:5px 9px;background:#060a0e;border-radius:7px;font-size:11px;color:#6b7a99">בפועל: '+(wkt.actual.km||'–')+' ק"מ | '+(wkt.actual.pace||'–')+' | '+(['😫','😓','😐','😊','🔥'][wkt.actual.feel]||'')+'</div>'));}
+          body.appendChild(wc);
+        });c.appendChild(body);
+      }page.appendChild(c);
+    });
+  }
+
+  if(tab==='stats'){
+    const cw=all.filter(w=>w.completed),sw=all.filter(w=>w.skipped);
+    const km=cw.reduce((s,w)=>s+(parseFloat(w.actual&&w.actual.km?w.actual.km:0)||w.distance||0),0);
+    const af=cw.length?(cw.reduce((s,w)=>s+(w.actual?(w.actual.feel||2):2),0)/cw.length).toFixed(1):'—';
+    const sm2={};sw.forEach(w=>{sm2[w.skipReason]=(sm2[w.skipReason]||0)+1;});
+    const sg=div('g2');
+    [['ק"מ רצתי',km.toFixed(0)+' ק"מ','🏃'],['הושלמו',cw.length,'✅'],['דולגו',sw.length,'😴'],['תחושה',af+' / 4','😊'],['ימים',dl!==null?dl:'—','📅'],['התקדמות',pct+'%','📈']].forEach(([l,v,e])=>{
+      const c=div('card sc');c.innerHTML='<div style="font-size:22px">'+e+'</div><div class="sv">'+String(v)+'</div><div class="sl">'+l+'</div>';sg.appendChild(c);
+    });page.appendChild(sg);
+    if(Object.keys(sm2).length){
+      const sc=div('card col');sc.style.marginTop='10px';
+      sc.innerHTML='<div style="font-size:13px;color:#ffd32a;font-weight:700;margin-bottom:8px">😴 סיבות דילוג</div>';
+      Object.entries(sm2).forEach(([r,n])=>{sc.innerHTML+='<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #1c2433"><span>'+r+'</span><span style="color:#ffd32a;font-weight:700">'+n+'x</span></div>';});
+      page.appendChild(sc);
+    }
+    const ic=div('card');ic.style.cssText='margin-top:10px;border-color:rgba(0,229,160,0.2)';
+    ic.innerHTML='<div style="font-size:13px">יעד: '+ri.label+' | '+plan.estimatedFinish+(prof.goalTime?' (מטרה: '+prof.goalTime+')':'')+'</div><div style="font-size:13px;margin-top:5px">קצב: '+plan.targetPace+'</div>'+(plan.notes?'<div style="font-size:12px;color:#6b7a99;margin-top:5px">'+plan.notes+'</div>':'');
+    page.appendChild(ic);
+    const rb=btn('bd bf','🗑 אפס ובנה תוכנית חדשה',()=>{if(confirm('למחוק הכל?')){app=null;sStep=0;sd={race:null,csv:null,rec:null,goalH:'',goalM:'',goalS:'',date:'',longKm:'',wkKm:'',runs:[{d:'',km:'',p:''},{d:'',km:'',p:''},{d:'',km:'',p:''}],analyzing:false};save(null);render();}});
+    rb.style.marginTop='10px';page.appendChild(rb);
+  }
+
+  w.appendChild(page);
+  if(logWkt)w.appendChild(logModal());
+  return w;
+}
+
+function logModal(){
+  const ov=div('ov');const m=div('modal col');
+  const mh=div('mhdr');
+  mh.innerHTML='<div><div style="font-weight:800;font-size:16px;font-family:Heebo,sans-serif">'+logWkt.day+'</div></div>';
+  mh.querySelector('div').appendChild(mk(logWkt.type));
+  const xb=el('button','xbtn','×');xb.onclick=()=>{logWkt=null;render();};mh.appendChild(xb);m.appendChild(mh);
+  const sb=div('skbox');
+  sb.innerHTML='<div style="font-size:12px;color:#ffd32a;font-weight:700;margin-bottom:8px">😴 דילגתי על האימון</div>';
+  const sr=div('brow');sr.style.flexWrap='wrap';
+  [['מחלה / עייפות','מחלה'],['לא היה זמן','עסוק'],['פציעה / כאב','פציעה'],['מזג אוויר','מזג אוויר']].forEach(([l,v])=>{sr.appendChild(btn('bsk bsm',l,()=>doRec(null,v)));});
+  sb.appendChild(sr);m.appendChild(sb);
+  m.appendChild(el('div','','<div style="text-align:center;color:#6b7a99;font-size:12px;margin-bottom:12px">— או תעד את האימון —</div>'));
+  const g=div('g2');g.style.marginBottom='10px';
+  const kw=el('div');kw.innerHTML='<label class="lbl">ק"מ בפועל</label>';
+  const ki=el('input','inp');ki.type='number';ki.placeholder=String(logWkt.distance||'');ki.id='lk';kw.appendChild(ki);g.appendChild(kw);
+  const pw=el('div');pw.innerHTML='<label class="lbl">קצב בפועל</label>';
+  const pi=el('input','inp');pi.placeholder=logWkt.targetPace||'5:30';pi.id='lp';pw.appendChild(pi);g.appendChild(pw);
+  m.appendChild(g);
+  const hw=el('div');hw.style.marginBottom='10px';hw.innerHTML='<label class="lbl">דופק (אופציונלי)</label>';
+  const hi=el('input','inp');hi.type='number';hi.placeholder='145';hi.id='lh';hw.appendChild(hi);m.appendChild(hw);
+  const fw=el('div');fw.style.marginBottom='10px';fw.innerHTML='<label class="lbl" style="margin-bottom:6px">איך הרגשת?</label>';
+  const fg=div('fgrid');let fv=3;
+  FL.forEach((f,i)=>{
+    const fb=el('button','fb'+(i===fv?' on':''),f);
+    fb.onclick=()=>{fv=i;fg.querySelectorAll('.fb').forEach((b,j)=>b.className='fb'+(j===i?' on':''));};
+    fg.appendChild(fb);
+  });
+  fw.appendChild(fg);m.appendChild(fw);
+  const nw=el('div');nw.style.marginBottom='10px';nw.innerHTML='<label class="lbl">הערות</label>';
+  const ni=el('textarea','inp');ni.placeholder='כאב, תחושה, מזג אוויר...';ni.id='ln';ni.style.cssText='resize:vertical;min-height:50px';nw.appendChild(ni);m.appendChild(nw);
+  m.appendChild(btn('bp bf','✓ שמור ועדכן תוכנית',()=>{
+    const km=document.getElementById('lk').value;
+    const pace=document.getElementById('lp').value;
+    const hr=document.getElementById('lh').value;
+    const notes=document.getElementById('ln').value;
+    if(!km&&!pace){alert('הכנס לפחות מרחק או קצב');return;}
+    doRec({km,pace,hr,feel:fv,notes},null);
+  }));
+  ov.appendChild(m);return ov;
+}
+
+async function doRec(actual,skip){
+  const wkt=logWkt;logWkt=null;busy=true;
+  const flash=msg=>{const e=document.getElementById('sm');if(e){e.textContent=(busy?'⏳ ':'')+msg;e.style.display='block';}};
+  flash(skip?'מעדכן תוכנית לאחר דילוג...':'מעדכן תוכנית לפי ביצועים...');
+  const plan=app.plan,prof=app.profile;
+  const ri=RACES.find(r=>r.key===(plan.raceDistance||prof.raceDistance))||RACES[3];
+  const nw=plan.weeklyPlan.map(wk=>({...wk,workouts:wk.workouts.map(w=>{
+    if(w.id!==wkt.id)return w;
+    return skip?{...w,skipped:true,skipReason:skip}:{...w,completed:true,actual};
+  })}));
+  const fb={...app,plan:{...plan,weeklyPlan:nw}};
+  render();
+  try{
+    const cc=nw.flatMap(w=>w.workouts).filter(w=>w.completed).length;
+    const ev=skip?'SKIPPED:'+skip+(skip==='פציעה'?' INJURY':''):'Done:'+(actual.km||'?')+'km pace '+(actual.pace||'?')+' feel '+actual.feel+'/4 notes:'+(actual.notes||'none');
+    const sys='Elite coach. Return ONLY minified JSON plan+goalReview. Hebrew max 35 chars.';
+    const usr='Workout:'+JSON.stringify({id:wkt.id,type:wkt.type,distance:wkt.distance,targetPace:wkt.targetPace})+'\nEvent:'+ev+'\nGoal:'+(prof.goalTime||plan.estimatedFinish)+' for '+ri.label+'\nCompleted:'+cc+'\nAdjust future. Eval goal only if 3+ done.\nReturn:{"fitnessLevel":"...","estimatedFinish":"...","targetPace":"...","raceDistance":"'+(plan.raceDistance||prof.raceDistance)+'","weeklyPlan":[...],"notes":"...","goalReview":{"needsRevision":false,"type":"ok","suggestedTime":"","reason":""}}';
+    const txt=await ai(sys,usr);
+    const upd=xj(txt);const gr=upd.goalReview;delete upd.goalReview;
+    app={...app,plan:{...plan,...upd,weeklyPlan:upd.weeklyPlan}};save(app);
+    if(gr&&gr.needsRevision&&gr.type!=='ok')gAlert=gr;
+    busy=false;render();
+    setTimeout(()=>{const e=document.getElementById('sm');if(e){e.textContent=skip?'📋 תוכנית עודכנה לאחר הדילוג':'✅ תוכנית עודכנה לפי הביצועים!';setTimeout(()=>{e.style.display='none';},5000);}},100);
+  }catch(ex){
+    app=fb;save(app);busy=false;render();
+    setTimeout(()=>{const e=document.getElementById('sm');if(e){e.textContent='האימון נשמר. עדכון נכשל.';setTimeout(()=>{e.style.display='none';},5000);}},100);
+  }
+}
+
+key=loadKey();app=load();render();
+</script>
+</body>
+</html>
